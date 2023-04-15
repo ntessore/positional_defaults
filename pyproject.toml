@@ -6,6 +6,7 @@ build-backend = "flit_core.buildapi"
 name = "leftdefault"
 authors = [
     {name = "Nicolas Tessore", email = "n.tessore@ucl.ac.uk"},
+    {name = "Nathaniel Starkman", email = "n.starkman@mail.utoronto.ca"},
 ]
 readme = "README.md"
 license = {file = "LICENSE.txt"}
