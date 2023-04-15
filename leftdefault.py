@@ -59,7 +59,7 @@ class LeftDefaultSignature(_Signature):
         return MappingProxyType(
             {
                 name: pars[name]
-                for name in [*names[:i], *names[j:k], *names[i:j], *names[k:]]
+                for name in (*names[:i], *names[j:k], *names[i:j], *names[k:])
             },
         )
 
