@@ -44,6 +44,25 @@ puttext(0., 'hi')
 puttext(0., 1., 'hi')
 ```
 
+The `@leftdefault` decorator accepts an optional `which=` keyword argument to
+specify the exact sequence of default arguments to be moved to the left:
+
+```py
+@leftdefault(which='greeting, prefix, forename')
+def greet(surname, forename='Alice', greeting='Welcome', prefix='Mrs', suffix='Esq', /):
+    print(greeting, prefix, forename, surname, suffix)
+
+# these are now equivalent
+greet('Smith')
+greet('Alice', 'Smith')
+greet('Welcome', 'Alice', 'Smith')
+greet('Welcome', 'Mrs', 'Alice', 'Smith')
+greet('Welcome', 'Mrs', 'Alice', 'Smith', 'Esq')
+```
+
+The order in which default arguments are filled is the order in which they
+are defined in the original function.
+
 The `@leftdefault` decorator can take an optional `skip=N` keyword argument to
 indicate that `N` initial positional-only arguments should be skipped.  This is
 necessary for methods with `self`:
@@ -84,5 +103,11 @@ myrange(start=0, stop, /, step=1)
 Help on function puttext:
 
 puttext(x=None, y=None, text, /, *args, **kwargs)
+
+>>> help(greet)
+
+Help on function greet:
+
+greet(greeting='Welcome', prefix='Mrs', forename='Alice', surname, suffix='Esq', /)
 
 ```
