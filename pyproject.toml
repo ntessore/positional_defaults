@@ -17,8 +17,12 @@ requires-python = ">=3.8"
 dynamic = ["version", "description"]
 
 [project.urls]
-Home = "https://github.com/ntessore/leftdefault"
+Homepage = "https://github.com/ntessore/leftdefault"
 Issues = "https://github.com/ntessore/leftdefault/issues"
 
 [tool.flit.sdist]
 exclude = [".*"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
