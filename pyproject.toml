@@ -17,7 +17,7 @@ requires-python = ">=3.8"
 dynamic = ["version", "description"]
 
 [project.urls]
-Home = "https://github.com/ntessore/leftdefault"
+Homepage = "https://github.com/ntessore/leftdefault"
 Issues = "https://github.com/ntessore/leftdefault/issues"
 
 [tool.flit.sdist]
@@ -26,17 +26,3 @@ exclude = [".*"]
 [tool.mypy]
 python_version = "3.10"
 strict = true
-
-[tool.ruff]
-target-version = "py310"
-line-length = 88
-select = ["ALL"]
-ignore = [
-  # flake8-annotations (ANN)
-  "ANN101",  # missing type annotation for self
-  # pydocstyle (D)
-  "D203",  # one-blank-line-before-class  # contra numpydoc
-  "D213",  # multi-line-summary-second-line
-  # flake8-commas (COM)
-  "COM812",  # TrailingCommaMissing
-]
