@@ -1,17 +1,30 @@
 # type: ignore
 
 import sys
+import os
 from setuptools import setup
 
 py_modules = ['positional_defaults', '_positional_defaults']
 ext_modules = []
+setup_requires = []
 
-if len(sys.argv) > 1 and '--use-mypyc' in sys.argv:
+use_mypyc = False
+
+if '--use-mypyc' in sys.argv:
     sys.argv.remove('--use-mypyc')
+    use_mypyc = True
+elif os.getenv('USE_MYPYC', None) is not None:
+    use_mypyc = True
 
-    from mypyc.build import mypycify
+if use_mypyc:
+    try:
+        from mypyc.build import mypycify
+    except ModuleNotFoundError:
+        setup_requires.append('mypy')
+    else:
+        py_modules.remove('positional_defaults')
+        ext_modules = mypycify(['positional_defaults.py'])
 
-    py_modules.remove('positional_defaults')
-    ext_modules = mypycify(['positional_defaults.py'])
-
-setup(py_modules=py_modules, ext_modules=ext_modules)
+setup(py_modules=py_modules,
+      ext_modules=ext_modules,
+      setup_requires=setup_requires)
