@@ -1,27 +1,28 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "leftdefault"
+name = "positional_defaults"
 authors = [
     {name = "Nicolas Tessore", email = "n.tessore@ucl.ac.uk"},
     {name = "Nathaniel Starkman", email = "n.starkman@mail.utoronto.ca"},
 ]
+description = "Set defaults for any positional-only parameter"
 readme = "README.md"
 license = {file = "LICENSE.txt"}
 classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 requires-python = ">=3.8"
-dynamic = ["version", "description"]
+dynamic = ["version"]
 
 [project.urls]
-Homepage = "https://github.com/ntessore/leftdefault"
-Issues = "https://github.com/ntessore/leftdefault/issues"
+Homepage = "https://github.com/ntessore/positional_defaults"
+Issues = "https://github.com/ntessore/positional_defaults/issues"
 
-[tool.flit.sdist]
-exclude = [".*"]
+[tool.setuptools.dynamic]
+version = {attr = "positional_defaults.__version__"}
 
 [tool.mypy]
 python_version = "3.10"

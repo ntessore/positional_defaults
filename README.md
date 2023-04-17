@@ -1,28 +1,29 @@
-leftdefault
-===========
+positional_defaults
+===================
 
-**Python package to put default before non-default arguments**
+**Python package to set defaults for any positional-only parameter**
 
-This tiny Python package contains a decorator `@leftdefault` which moves
-positional-only default arguments to the beginning of the function signature.
+This tiny Python package contains a decorator `@defaults` which lets you
+specify default arguments for any positional-only parameter, no matter where
+it appears in the argument list.
 
 Installation
 ------------
 
-    pip install leftdefault
+    pip install positional_defaults
 
 Usage
 -----
 
-Simply decorate functions with `@leftdefault` and delimit the arguments with
-the positional-only indicator `/`:
+Use the `@defaults` decorator to set default values for positional-only
+parameters (i.e. those before the positional-only indicator `/`):
 
 ```py
-from leftdefault import leftdefault
+from positional_defaults import defaults
 
-@leftdefault
-def myrange(stop, start=0, /, step=1):
-    return (start, stop, step)
+@defaults(start=0)
+def myrange(start, stop, /, step=1):
+    ...
 
 # now these are equivalent
 myrange(4)
@@ -30,27 +31,22 @@ myrange(0, 4)
 myrange(0, 4, 1)
 ```
 
-Multiple default arguments can be moved to the left, they are filled from first
-to last as usual:
+This works on methods as well:
 
 ```py
-@leftdefault
-def puttext(text, x=0., y=1., /, *args, **kwargs):
-    return (x, y, text)
-
-# now these are equivalent
-puttext('hi')
-puttext(0., 'hi')
-puttext(0., 1., 'hi')
+class A:
+    @defaults(start=0)
+    def myrange(self, start, stop, /, step=1):
+        ...
 ```
 
-The `@leftdefault` decorator accepts an optional `which=` keyword argument to
-specify the exact sequence of default arguments to be moved to the left:
+Multiple defaults can be set, which are filled in the order in which they are
+specified:
 
 ```py
-@leftdefault(which='greeting, prefix, forename')
-def greet(surname, forename='Alice', greeting='Welcome', prefix='Mrs', suffix='Esq', /):
-    print(greeting, prefix, forename, surname, suffix)
+@defaults(forename='Alice', greeting='Welcome', prefix='Mrs')
+def greet(greeting, prefix, forename, surname, /, suffix='Esq'):
+    ...
 
 # these are now equivalent
 greet('Smith')
@@ -60,21 +56,7 @@ greet('Welcome', 'Mrs', 'Alice', 'Smith')
 greet('Welcome', 'Mrs', 'Alice', 'Smith', 'Esq')
 ```
 
-The order in which default arguments are filled is the order in which they
-are defined in the original function.
-
-The `@leftdefault` decorator can take an optional `skip=N` keyword argument to
-indicate that `N` initial positional-only arguments should be skipped.  This is
-necessary for methods with `self`:
-
-```py
-class A:
-    @leftdefault(skip=1)
-    def rangemethod(self, stop, start=0, /, step=1):
-        return (start, stop, step)
-```
-
-Inspection
+Signatures
 ----------
 
 Left-defaulted functions come with the correct signature:
@@ -83,10 +65,8 @@ Left-defaulted functions come with the correct signature:
 >>> from inspect import signature
 >>> signature(myrange)
 <Signature (start=0, stop, /, step=1)>
->>> signature(puttext)
-<Signature (x=None, y=None, text, /, *args, **kwargs)>
->>> signature(A.rangemethod)
-<Signature (self, start=0, stop, /, step=1)>
+>>> signature(greet)
+<Signature (greeting='Welcome', prefix='Mrs', forename='Alice', surname, /, suffix='Esq')>
 ```
 
 These show up correctly in the usual places such as `help()`:
@@ -98,16 +78,10 @@ Help on function myrange:
 
 myrange(start=0, stop, /, step=1)
 
->>> help(A.interval)
-
-Help on function puttext:
-
-puttext(x=None, y=None, text, /, *args, **kwargs)
-
 >>> help(greet)
 
 Help on function greet:
 
-greet(greeting='Welcome', prefix='Mrs', forename='Alice', surname, suffix='Esq', /)
+greet(greeting='Welcome', prefix='Mrs', forename='Alice', surname, /, suffix='Esq')
 
 ```
