@@ -10,7 +10,7 @@ def fill(pattern: Tuple[object, ...], args: Tuple[object, ...],
          ) -> Tuple[object, ...]:
     '''Replace ARG with args in pattern and concatenate rest of args.'''
     k = -1
-    return (tuple(args[k := k+1] if a is ARG else a for a in pattern)
+    return (tuple(args[(k := k+1)] if a is ARG else a for a in pattern)
             + args[k+1:])
 
 

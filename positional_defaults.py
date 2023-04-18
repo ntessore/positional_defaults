@@ -36,7 +36,7 @@ class Signature(_Signature):
         self.__parameters = MappingProxyType(parameters)
 
     @property
-    def parameters(self) -> MappingProxyType[str, Parameter]:
+    def parameters(self) -> 'MappingProxyType[str, Parameter]':
         return self.__parameters
 
 
