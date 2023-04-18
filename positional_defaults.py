@@ -1,7 +1,7 @@
 # license: MIT
 '''Set defaults for any positional-only parameter.'''
 
-__version__ = '2023.4.17'
+__version__ = '2023.4.18'
 
 __all__ = ['defaults']
 
