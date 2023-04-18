@@ -1,30 +1,27 @@
 '''Implementation details of the positional_defaults package.'''
 
-from inspect import Parameter, Signature as _Signature
-from typing import Any
-from types import MappingProxyType
+from functools import wraps
+from typing import Any, Callable, Tuple
+
+ARG = object()
 
 
-class Signature(_Signature):
-    '''Signature with defaults anywhere in positional-only parameters.'''
+def fill(pattern: Tuple[object, ...], args: Tuple[object, ...],
+         ) -> Tuple[object, ...]:
+    '''Replace ARG with args in pattern and concatenate rest of args.'''
+    k = -1
+    return (tuple(args[k := k+1] if a is ARG else a for a in pattern)
+            + args[k+1:])
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self.__parameters = super().parameters
 
-    def update_defaults(self, **defaults: object) -> None:
-        '''Set default values anywhere in the positional-only parameters.'''
-        parameters = {**super().parameters}
-        for name, default in defaults.items():
-            try:
-                par = parameters[name]
-            except KeyError:
-                raise ValueError(f'unknown parameter "{name}"') from None
-            if par.kind != par.POSITIONAL_ONLY:
-                raise ValueError(f'parameter "{name}" is not positional-only')
-            parameters[name] = par.replace(default=default)
-        self.__parameters = MappingProxyType(parameters)
+def wrap(wrapped: Callable[..., Any],
+         patterns: Tuple[Tuple[object, ...], ...],
+         ) -> Callable[..., Any]:
+    '''Create a wrapper that fills in args based on pattern.'''
+    n = len(patterns) - 1
 
-    @property
-    def parameters(self) -> MappingProxyType[str, Parameter]:
-        return self.__parameters
+    @wraps(wrapped)
+    def wrapper(*args: object, **kwargs: object) -> Any:
+        return wrapped(*fill(patterns[min(len(args), n)], args), **kwargs)
+
+    return wrapper

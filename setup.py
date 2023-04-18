@@ -22,8 +22,8 @@ if use_mypyc:
     except ModuleNotFoundError:
         setup_requires.append('mypy')
     else:
-        py_modules.remove('positional_defaults')
-        ext_modules = mypycify(['positional_defaults.py'])
+        py_modules.remove('_positional_defaults')
+        ext_modules = mypycify(['_positional_defaults.py'])
 
 setup(py_modules=py_modules,
       ext_modules=ext_modules,
