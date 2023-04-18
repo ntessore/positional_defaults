@@ -24,7 +24,9 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          path: dist/*.{tar.gz,whl}
+          path: |
+            dist/*.tar.gz
+            dist/*.whl
 
   compile:
     name: Compile wheels on ${{ matrix.os }}
