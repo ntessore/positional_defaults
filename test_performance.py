@@ -1,13 +1,12 @@
 # type: ignore
 
 from functools import wraps
-from inspect import signature
 from timeit import repeat
 
 from positional_defaults import defaults
 
 
-def nodefaults(func):
+def decorated(func):
     '''Comparison: only call function with args & kwargs.'''
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -19,40 +18,48 @@ def test_performance(*funcs, **repeat_kwargs):
     '''Test the performance of the passed functions.'''
     results = []
     for func in funcs:
-        name = func.__name__
-        sig = signature(func)
-        nargs = len(sig.parameters)
-        stmt = f'{name}{tuple(range(nargs))}'
-        times = repeat(stmt, globals=globals(), **repeat_kwargs)
-        results.append((name, times))
+        times = repeat(func, **repeat_kwargs)
+        results.append((func.__name__, times))
     return results
 
 
-def func1(a, /):
+def func0():
+    '''Function with no arguments, doing nothing.'''
+    pass
+
+
+def func1(a1=None, /):
     '''Function with one argument, doing nothing.'''
     pass
 
 
-def func5(a, b, c, d, e, /):
+def func5(a1=None, a2=None, a3=None, a4=None, a5=None, /):
     '''Function with five arguments, doing nothing.'''
     pass
 
 
-func1_nodefaults = nodefaults(func1)
-func1_nodefaults.__name__ = 'func1_nodefaults'
+func0_decorated = decorated(func0)
+func0_decorated.__name__ = 'func0_decorated'
 
-func1_defaults = defaults(func1, a=None)
+func0_defaults = defaults(func0)
+func0_defaults.__name__ = 'func0_defaults'
+
+func1_decorated = decorated(func1)
+func1_decorated.__name__ = 'func1_decorated'
+
+func1_defaults = defaults(func1)
 func1_defaults.__name__ = 'func1_defaults'
 
-func5_nodefaults = nodefaults(func5)
-func5_nodefaults.__name__ = 'func5_nodefaults'
+func5_decorated = decorated(func5)
+func5_decorated.__name__ = 'func5_decorated'
 
-func5_defaults = defaults(func5, a=None, d=None)
+func5_defaults = defaults(func5)
 func5_defaults.__name__ = 'func5_defaults'
 
 results = test_performance(
-    func1, func1_nodefaults, func1_defaults,
-    func5, func5_nodefaults, func5_defaults,
+    func0, func0_decorated, func0_defaults,
+    func1, func1_decorated, func1_defaults,
+    func5, func5_decorated, func5_defaults,
 )
 
 for name, times in results:

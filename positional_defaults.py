@@ -70,9 +70,9 @@ def defaults(func: Union[F, None] = None, /, **_defaults: object) -> Any:
 
     @wraps(wrapped)
     def wrapper(*args: object, **kwargs: object) -> Any:
-        a = (args, __defaults__)
-        args = tuple(a[i][j] for i, j in where[min(len(args), n)]) + args[n:]
-        return wrapped(*args, **kwargs)
+        a: Tuple[Tuple[object, ...], ...] = (args, __defaults__)
+        poargs = tuple(a[i][j] for i, j in where[min(len(args), n)])
+        return wrapped(*poargs, *args[n:], **kwargs)
 
     wrapper.__signature__ = sig  # type: ignore[attr-defined]
 
