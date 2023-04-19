@@ -6,8 +6,7 @@ __version__ = '2023.4.19'
 __all__ = ['defaults']
 
 from functools import partial, update_wrapper
-from inspect import Parameter, Signature as _Signature
-from types import MappingProxyType
+from inspect import Signature
 from typing import Any, Callable, TypeVar, Union, overload
 
 from _positional_defaults import wrap
@@ -18,29 +17,16 @@ F = TypeVar('F', bound=Callable[..., Any])
 ARG = object()
 
 
-class Signature(_Signature):
-    '''Signature with defaults anywhere in positional-only parameters.'''
+class DefaultsSignature(Signature):
+    '''Signature for defaults anywhere in the positional-only parameters.'''
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    __slots__ = ()
+
+    def __init__(self, *args: Any, **kwargs: Any,
+                 ) -> None:
+        if '__validate_parameters__' not in kwargs:
+            kwargs['__validate_parameters__'] = False
         super().__init__(*args, **kwargs)
-        self.__parameters = super().parameters
-
-    def update_defaults(self, **defaults: object) -> None:
-        '''Set default values anywhere in the positional-only parameters.'''
-        parameters = {**super().parameters}
-        for name, default in defaults.items():
-            try:
-                par = parameters[name]
-            except KeyError:
-                raise ValueError(f'unknown parameter "{name}"') from None
-            if par.kind != par.POSITIONAL_ONLY:
-                raise ValueError(f'parameter "{name}" is not positional-only')
-            parameters[name] = par.replace(default=default)
-        self.__parameters = MappingProxyType(parameters)
-
-    @property
-    def parameters(self) -> 'MappingProxyType[str, Parameter]':
-        return self.__parameters
 
 
 @overload
@@ -64,21 +50,24 @@ def defaults(func: Union[F, None] = None, /, **_defaults: object
         raise TypeError('not a callable')
 
     sig = Signature.from_callable(func)
-    sig.update_defaults(**_defaults)
 
-    popars = {name: par for name, par in sig.parameters.items()
-              if par.kind == par.POSITIONAL_ONLY}
+    posonly = [name for name, par in sig.parameters.items()
+               if par.kind == par.POSITIONAL_ONLY]
 
-    fill_order = [name for name in popars if name not in _defaults]
+    if (missing := _defaults.keys() - posonly):
+        raise ValueError('not a positional-only parameter: '
+                         + ', '.join(missing))
+
+    fill_order = [name for name in posonly if name not in _defaults]
     fill_order += list(_defaults.keys())
 
-    part_order = [[name for name in popars if name in fill_order[:n]]
-                  for n in range(len(popars))]
+    part_order = [[name for name in posonly if name in fill_order[:n]]
+                  for n in range(len(posonly))]
 
     patterns = []
     for names in part_order:
         pattern = []
-        for name in popars:
+        for name in posonly:
             if name in names:
                 pattern.append(ARG)
             elif name in _defaults:
@@ -89,6 +78,11 @@ def defaults(func: Union[F, None] = None, /, **_defaults: object
 
     wrapper = wrap(func, tuple(patterns), ARG)
     update_wrapper(wrapper, func)
-    wrapper.__signature__ = sig  # type: ignore[attr-defined]
+
+    pars = [par.replace(default=_defaults.get(par.name, par.default))
+            for par in sig.parameters.values()]
+    newsig = DefaultsSignature(pars, return_annotation=sig.return_annotation)
+
+    wrapper.__signature__ = newsig  # type: ignore[attr-defined]
 
     return wrapper

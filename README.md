@@ -64,9 +64,9 @@ Left-defaulted functions come with the correct signature:
 ```py
 >>> from inspect import signature
 >>> signature(myrange)
-<Signature (start=0, stop, /, step=1)>
+<DefaultsSignature (start=0, stop, /, step=1)>
 >>> signature(greet)
-<Signature (greeting='Welcome', prefix='Mrs', forename='Alice', surname, /, suffix='Esq')>
+<DefaultsSignature (greeting='Welcome', prefix='Mrs', forename='Alice', surname, /, suffix='Esq')>
 ```
 
 These show up correctly in the usual places such as `help()`:
