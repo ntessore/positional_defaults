@@ -72,7 +72,7 @@ Left-defaulted functions come with the correct signature:
 These show up correctly in the usual places such as `help()`:
 
 ```py
->>> help(interval)
+>>> help(myrange)
 
 Help on function myrange:
 
@@ -85,3 +85,10 @@ Help on function greet:
 greet(greeting='Welcome', prefix='Mrs', forename='Alice', surname, /, suffix='Esq')
 
 ```
+
+Performance
+-----------
+
+When the package is compiled as a native extension (which is what pip will
+deliver in the majority of cases), the speed of functions with positional
+defaults is comparable to the speed of the undecorated functions.

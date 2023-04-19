@@ -42,7 +42,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.12.1
         env:
           CIBW_BUILD: 'cp*'
-          CIBW_ENVIRONMENT: USE_MYPYC=1
+          CIBW_ENVIRONMENT: COMPILE_POSITIONAL_DEFAULTS=1
 
       - uses: actions/upload-artifact@v3
         with:

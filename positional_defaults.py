@@ -1,18 +1,21 @@
 # license: MIT
 '''Set defaults for any positional-only parameter.'''
 
-__version__ = '2023.4.18'
+__version__ = '2023.4.19'
 
 __all__ = ['defaults']
 
-from functools import partial
+from functools import partial, update_wrapper
 from inspect import Parameter, Signature as _Signature
 from types import MappingProxyType
-from typing import Any, Callable, List, Tuple, TypeVar, Union, overload
+from typing import Any, Callable, TypeVar, Union, overload
 
-from _positional_defaults import ARG, wrap
+from _positional_defaults import wrap
 
 F = TypeVar('F', bound=Callable[..., Any])
+
+
+ARG = object()
 
 
 class Signature(_Signature):
@@ -63,31 +66,29 @@ def defaults(func: Union[F, None] = None, /, **_defaults: object
     sig = Signature.from_callable(func)
     sig.update_defaults(**_defaults)
 
-    pars = {name: par for name, par in sig.parameters.items()
-            if par.kind == par.POSITIONAL_ONLY}
+    popars = {name: par for name, par in sig.parameters.items()
+              if par.kind == par.POSITIONAL_ONLY}
 
-    n = len(pars)
-
-    fill_order = [name for name in pars if name not in _defaults]
+    fill_order = [name for name in popars if name not in _defaults]
     fill_order += list(_defaults.keys())
 
-    part_order = [[name for name in pars if name in fill_order[:k]]
-                  for k in range(n+1)]
+    part_order = [[name for name in popars if name in fill_order[:n]]
+                  for n in range(len(popars))]
 
-    _patterns: List[Tuple[object, ...]] = []
-    for k in range(n+1):
-        pattern: List[object] = []
-        for name in pars:
-            if name in part_order[k]:
+    patterns = []
+    for names in part_order:
+        pattern = []
+        for name in popars:
+            if name in names:
                 pattern.append(ARG)
             elif name in _defaults:
                 pattern.append(_defaults[name])
             else:
                 break
-        _patterns.append(tuple(pattern))
-    patterns: Tuple[Tuple[object, ...], ...] = tuple(_patterns)
+        patterns.append(tuple(pattern))
 
-    wrapper = wrap(func, patterns)
+    wrapper = wrap(func, tuple(patterns), ARG)
+    update_wrapper(wrapper, func)
     wrapper.__signature__ = sig  # type: ignore[attr-defined]
 
     return wrapper
