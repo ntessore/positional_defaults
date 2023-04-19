@@ -90,5 +90,5 @@ Performance
 -----------
 
 When the package is compiled as a native extension (which is what pip will
-deliver in the majority of cases), the speed of functions with positional
-defaults is comparable to the speed of the undecorated functions.
+deliver in the majority of cases), functions with positional defaults have
+comparable performance with respect to their undecorated functions.
